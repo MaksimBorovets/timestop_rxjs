@@ -1,55 +1,23 @@
 import React from "react";
 import styled from "styled-components";
-import { fromEvent, Subject, interval} from 'rxjs'; 
-import { map, buffer,takeUntil, filter, debounceTime } from 'rxjs/operators';
 
 function App() {
   const [time, setTime] = React.useState(0);
   const [timerOn, setTimerOn] = React.useState(false);
 
-
-
-
   React.useEffect(() => {
+    let interval = null;
 
-      const stream$ = new Subject();
+    if (timerOn) {
+      interval = setInterval(() => {
+        setTime((prevTime) => prevTime + 10);
+      }, 10);
+    } else if (!timerOn) {
+      clearInterval(interval);
+    }
 
-      interval(10)
-        .pipe(takeUntil(stream$))
-        .subscribe(() => {
-          if (timerOn) {
-            setTime(val => val + 10);
-          } else if (!timerOn){
-            stream$.next();
-            stream$.complete();
-          }
-        });
-      return () => {
-        stream$.next();
-        stream$.complete();
-      };
-
-
-
-
+    return () => clearInterval(interval);
   }, [timerOn]);
-
-
-
-  React.useEffect(() => {
-    const click$ = fromEvent(document.getElementById('double-click'), 'click');
-
-    const doubleClick$ = click$
-    .pipe(
-      buffer(click$.pipe(debounceTime(250))),
-      map(clicks => clicks.length),
-      filter(clicksLength => clicksLength >= 2)
-    );
-    
-  doubleClick$.subscribe(_ => {
-      setTimerOn(false)
-    })
-  }, []);
 
   return (
     <Timers>
@@ -63,13 +31,11 @@ function App() {
       <Buttons>
         <button onClick={() => setTimerOn(true)}>Start</button>
 
-        <button onClick={() => setTime(0) & setTimerOn(false)}>Stop</button>
+        <button onClick={() => setTimerOn(false)}>Stop</button>
 
         <button onClick={() => setTime(0)}>Reset</button>
 
-        <button id="double-click">Wait</button>
-
-
+        <button onClick={() => setTimerOn(true)}>Resume</button>
       </Buttons>
     </Timers>
   );
@@ -78,10 +44,9 @@ function App() {
 export default App;
 
 const Timers = styled.div`
-  width: 580px;
+  width: 180px;
   margin: 0 auto;
   text-align: center;
-  justify-content: center;
 `;
 
 const Display = styled.div`
@@ -93,13 +58,7 @@ const Display = styled.div`
 `;
 
 const Buttons = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-
   button {
-    margin-right: 5px;
     font-size: 16px;
     background-color: rgb(217, 60, 35);
     color: #fff;
@@ -110,6 +69,13 @@ const Buttons = styled.div`
 
     button:hover {
       background-color: rgb(173, 47, 28);
+    }
+
+    button:active {
+      background-color: rgb(130, 35, 21);
+    }
+    button:focus {
+      outline: 0;
     }
   }
 `;
