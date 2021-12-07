@@ -41,7 +41,7 @@ function App() {
 
     const doubleClick$ = click$
     .pipe(
-      buffer(click$.pipe(debounceTime(250))),
+      buffer(click$.pipe(debounceTime(300))),
       map(clicks => clicks.length),
       filter(clicksLength => clicksLength >= 2)
     );
@@ -65,7 +65,7 @@ function App() {
 
         <button onClick={() => setTime(0) & setTimerOn(false)}>Stop</button>
 
-        <button onClick={() => setTime(0)}>Reset</button>
+        <button onClick={() => setTime(0) & setTimerOn(true)}>Reset</button>
 
         <button id="double-click">Wait</button>
 
